@@ -220,11 +220,58 @@
       .catbtn{padding:5px 10px;font-size:12px}
       .wheel-stage{width:min(93vw,calc(100dvh - 360px),520px)}
     }
+    /* — Text zoom controls (ጽሑፍ አሳድግ / አሳንስ) — */
+    :root{--z:1}
+    .zoomctl{margin-left:auto;display:flex;gap:6px;align-items:center;flex:none}
+    .zbtn{height:40px;min-width:42px;padding:0 10px;border:1px solid var(--line);border-radius:12px;background:var(--paper);color:var(--accent);font-weight:800;font-size:17px;cursor:pointer;box-shadow:0 5px 16px rgba(31,77,51,.05);display:grid;place-items:center}
+    .zbtn.zlevel{font-size:14px;min-width:58px;color:var(--ink)}
+    .zbtn:hover{border-color:var(--accent)}
+    .zbtn:disabled{opacity:.45;cursor:default}
+    .zbtn:disabled:hover{border-color:var(--line)}
+    .zbtn:focus-visible{outline:3px solid color-mix(in srgb,var(--gold) 72%,transparent);outline-offset:2px}
+    .scene{touch-action:pan-y pinch-zoom}
+    .name{font-size:calc(clamp(44px,5vw,66px)*var(--z))}
+    .fact{font-size:calc(clamp(17px,1.9vw,22px)*var(--z))}
+    .role{font-size:calc(16px*var(--z))}.book{font-size:calc(16px*var(--z))}
+    .front-section strong{font-size:calc(14px*var(--z))}
+    .front-section p{font-size:calc(17px*var(--z))}
+    .front-verse p{font-size:calc(19px*var(--z))}
+    .front-today p{font-size:calc(17px*var(--z))}
+    .front-reference{font-size:calc(14px*var(--z))}
+    .verse-hint{font-size:calc(13px*var(--z))}
+    .catbtn{font-size:calc(14px*var(--z))}
+    .wheel-hint{font-size:calc(13.5px*var(--z))}
+    .reader-title h2{font-size:calc(clamp(24px,4vw,34px)*var(--z))}
+    .reader-body p{font-size:calc(19px*var(--z))}
+    html.zoom-in .front{overflow-y:auto;overscroll-behavior:contain}
+    html.zoom-in .front-rich{flex:none;grid-template-rows:none}
+    html.zoom-in .front-section{overflow:visible}
+    @media(max-width:760px){
+      .zbtn{height:36px;min-width:38px;font-size:16px}
+      .zbtn.zlevel{font-size:13px;min-width:54px}
+      .name{font-size:calc(clamp(24px,7vw,30px)*var(--z))}
+      .fact{font-size:calc(12.5px*var(--z))}
+      .role{font-size:calc(11px*var(--z))}.book{font-size:calc(11px*var(--z))}
+      .front-section strong{font-size:calc(11px*var(--z))}
+      .front-section p{font-size:calc(13.5px*var(--z))}
+      .front-verse p{font-size:calc(14.5px*var(--z))}
+      .front-today p{font-size:calc(13.5px*var(--z))}
+      .front-reference{font-size:calc(11.5px*var(--z))}
+      .verse-hint{font-size:calc(11.5px*var(--z))}
+      .catbtn{font-size:calc(12px*var(--z))}
+      .wheel-hint{font-size:calc(12.5px*var(--z))}
+      .reader-body p{font-size:calc(18px*var(--z))}
+    }
+    @media(max-width:760px) and (max-height:740px){
+      .name{font-size:calc(23px*var(--z))}
+      .front-section p,.front-today p{font-size:calc(12.5px*var(--z))}
+      .front-verse p{font-size:calc(13.5px*var(--z))}
+    }
   </style>
 </head>
 <body>
 <main class="page">
-  <header class="app-header"><h1>የመጽሐፍ ቅዱስ ሴቶች <span class="app-en">Women of the Bible</span></h1></header>
+  <header class="app-header"><h1>የመጽሐፍ ቅዱስ ሴቶች <span class="app-en">Women of the Bible</span></h1><div class="zoomctl" role="group" aria-label="የጽሑፍ መጠን"><button class="zbtn" id="zoomOut" type="button" aria-label="ጽሑፉን አሳንስ">−</button><button class="zbtn zlevel" id="zoomLevel" type="button" aria-label="ወደ መደበኛ የጽሑፍ መጠን መልስ">100%</button><button class="zbtn" id="zoomIn" type="button" aria-label="ጽሑፉን አሳድግ">+</button></div></header>
   <section class="toolbar" aria-label="የመማሪያ መቆጣጠሪያዎች">
     <select id="personSelect" aria-label="ሴት ምረጪ"></select>
     <button class="shuffle hidden" id="toWheel" type="button" aria-label="ወደ ዕጣ ዊሉ ተመለስ">‹ ወደ ዊል</button>
@@ -612,6 +659,13 @@ $('hubSpin').onclick=()=>spinWheel();
 $('wheelStage').addEventListener('click',e=>{if(e.target.closest('button'))return;spinWheel()});
 $('toWheel').onclick=()=>{if(wheelSpinning)return;buildWheel();showView('wheel')};
 sel.addEventListener('change',()=>{if(!wheelSpinning)showView('card')});
+// — Text zoom —
+const ZSTEPS=[0.8,0.9,1,1.15,1.3,1.5,1.75,2];let zi=2;
+function applyZoom(){const z=ZSTEPS[zi];document.documentElement.style.setProperty('--z',z);document.documentElement.classList.toggle('zoom-in',z>1);$('zoomLevel').textContent=Math.round(z*100)+'%';$('zoomOut').disabled=zi<=0;$('zoomIn').disabled=zi>=ZSTEPS.length-1}
+$('zoomIn').onclick=()=>{if(zi<ZSTEPS.length-1){zi++;applyZoom()}};
+$('zoomOut').onclick=()=>{if(zi>0){zi--;applyZoom()}};
+$('zoomLevel').onclick=()=>{zi=2;applyZoom()};
+applyZoom();
 buildWheel(); showView('wheel');
 render();
 })();
